@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>街のお弁当屋さん | できたて、手作りの温もりをお届け</title>
+    <!-- Tailwind CSS (スタイリング用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP (アニメーション用) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/30 text-stone-800 antialiased overflow-x-hidden">
+
+    <!-- ヘッダー -->
+    <header class="bg-white/95 backdrop-blur shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🍱</span>
+                <span class="text-xl font-bold text-amber-600 tracking-wider">街のお弁当屋さん</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- リアルタイム営業ステータス -->
+                <span id="header-status" class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-100 text-stone-600">
+                    読み込み中...
+                </span>
+                <a href="#menu" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full text-xs transition">
+                    メニュー・予約
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ① メインビジュアル -->
+    <section class="relative bg-stone-950 text-white py-24 md:py-32 overflow-hidden flex items-center justify-center min-h-[75vh]">
+        <!-- 背景画像 -->
+        <div class="absolute inset-0 opacity-40 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1200');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-transparent"></div>
+
+        <!-- 湯気エフェクトコンテナ (JSで制御) -->
+        <div id="steam-container" class="absolute inset-x-0 bottom-0 top-1/2 overflow-hidden pointer-events-none z-10"></div>
+
+        <div class="relative max-w-4xl mx-auto px-4 text-center z-20">
+            <span id="hero-tag" class="inline-block bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 opacity-0">できたて・手作りの味</span>
+            <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold leading-tight tracking-wide mb-6 opacity-0">
+                この安さ、実はぜんぶ手作りです。<br>
+                <span class="text-amber-400">今日も湯気までおいしい、できたての温もりをどうぞ。</span>
+            </h1>
+            <p id="hero-text" class="text-sm md:text-base text-stone-200 leading-relaxed max-w-2xl mx-auto mb-8 opacity-0">
+                コンビニ弁当より安いのに、お店のキッチンで毎日手作り。フタを開けた瞬間にふわっと広がるお出汁の匂いと、ホカホカのご飯で、忙しい毎日にほっとするひとときをお届けします。
+            </p>
+            <div id="hero-buttons" class="opacity-0">
+                <a href="#menu" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg text-center transition inline-block">
+                    ワンコイン弁当を予約する
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ② 今日のイチオシお弁当 -->
+    <section id="menu" class="py-16 max-w-6xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <span class="text-amber-600 font-bold text-sm tracking-widest block mb-2">MENU & PRE-ORDER</span>
+            <h2 class="text-3xl font-bold">メニューを選んでかんたん予約準備</h2>
+            <p class="text-xs text-stone-500 mt-2">お好きな個数を選んでください。お値段はどれもワンコイン500円（税込）です。</p>
+            <div class="w-12 h-1 bg-amber-500 mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <!-- 唐揚げ弁当 -->
+            <div class="menu-card bg-white rounded-2xl shadow-sm overflow-hidden border border-stone-100 opacity-0 transform translate-y-8">
+                <div class="h-48 bg-stone-200 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&q=80&w=600');"></div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">一番人気</span>
+                    <h3 class="text-xl font-bold mt-2 mb-1">サクサクジューシー 唐揚げ弁当</h3>
+                    <p class="text-xs text-stone-500 mb-4">秘伝のタレに漬け込んだ、肉汁あふれる自慢の逸品</p>
+                    <div class="flex justify-between items-center pt-4 border-t border-stone-100">
+                        <span class="text-2xl font-extrabold text-stone-900">500円<span class="text-sm font-normal text-stone-500">（税込）</span></span>
+                        
+                        <!-- 数量カウンター -->
+                        <div class="flex items-center gap-2 bg-stone-100 rounded-full p-1">
+                            <button onclick="changeQty('karaage', -1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">-</button>
+                            <span id="qty-karaage" class="w-6 text-center font-bold text-sm">0</span>
+                            <button onclick="changeQty('karaage', 1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ハンバーグ弁当 -->
+            <div class="menu-card bg-white rounded-2xl shadow-sm overflow-hidden border border-stone-100 opacity-0 transform translate-y-8">
+                <div class="h-48 bg-stone-200 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&q=80&w=600');"></div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">手ごね</span>
+                    <h3 class="text-xl font-bold mt-2 mb-1">お母さんの手ごねハンバーグ弁当</h3>
+                    <p class="text-xs text-stone-500 mb-4">ふっくら柔らか、どこか懐かしいデミグラスソース</p>
+                    <div class="flex justify-between items-center pt-4 border-t border-stone-100">
+                        <span class="text-2xl font-extrabold text-stone-900">500円<span class="text-sm font-normal text-stone-500">（税込）</span></span>
+                        
+                        <div class="flex items-center gap-2 bg-stone-100 rounded-full p-1">
+                            <button onclick="changeQty('hamburg', -1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">-</button>
+                            <span id="qty-hamburg" class="w-6 text-center font-bold text-sm">0</span>
+                            <button onclick="changeQty('hamburg', 1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日替わり弁当 -->
+            <div class="menu-card bg-white rounded-2xl shadow-sm overflow-hidden border border-stone-100 opacity-0 transform translate-y-8">
+                <div class="h-48 bg-stone-200 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600');"></div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">日替わり</span>
+                    <h3 class="text-xl font-bold mt-2 mb-1">本日のおまかせ和風弁当</h3>
+                    <p class="text-xs text-stone-500 mb-4">旬の食材をぎゅっと詰め込んだ体に優しい日替わりメニュー</p>
+                    <div class="flex justify-between items-center pt-4 border-t border-stone-100">
+                        <span class="text-2xl font-extrabold text-stone-900">500円<span class="text-sm font-normal text-stone-500">（税込）</span></span>
+                        
+                        <div class="flex items-center gap-2 bg-stone-100 rounded-full p-1">
+                            <button onclick="changeQty('daily', -1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">-</button>
+                            <span id="qty-daily" class="w-6 text-center font-bold text-sm">0</span>
+                            <button onclick="changeQty('daily', 1)" class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-stone-600 hover:bg-amber-100 active:scale-90 transition font-bold">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注文メモ＆予約連携エリア（個数を選んだら出現） -->
+        <div id="reservation-area" class="max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-3xl p-6 md:p-8 shadow-sm hidden">
+            <h3 class="text-lg font-bold text-stone-900 mb-4 text-center">📋 あなたのご予約メモ</h3>
+            
+            <div class="bg-white rounded-xl p-4 border border-amber-100/50 mb-6 text-sm text-stone-700">
+                <ul id="order-summary-list" class="space-y-1 mb-4">
+                    <!-- JSで選択したお弁当がここに入ります -->
+                </ul>
+                <div class="border-t border-stone-100 pt-3 flex justify-between items-center font-bold">
+                    <span>合計金額（税込）：</span>
+                    <span id="order-total-price" class="text-lg text-amber-600">0円</span>
+                </div>
+            </div>
+
+            <!-- 追加情報（受取時間、お名前）の入力（※メモに反映させるためだけの入力） -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs text-stone-500 font-bold mb-1">お名前</label>
+                    <input type="text" id="cust-name" oninput="updateOrderText()" placeholder="（例）山田" class="w-full text-sm p-2 rounded-lg border border-stone-200 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-stone-500 font-bold mb-1">受取希望時間</label>
+                    <input type="time" id="cust-time" oninput="updateOrderText()" class="w-full text-sm p-2 rounded-lg border border-stone-200 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <p class="text-xs text-stone-500 text-center mb-6 leading-relaxed">
+                上記のメモ内容を、以下のどちらかの方法でお店にお伝えください。
+            </p>
+
+            <!-- 2つの現実的な予約方法 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- 電話予約：口頭で読み上げる -->
+                <a href="tel:000-000-0000" class="flex flex-col items-center justify-center bg-white border-2 border-amber-500 hover:bg-amber-50 p-4 rounded-xl text-center shadow-sm transition active:scale-95">
+                    <span class="text-xl mb-1">📞</span>
+                    <span class="text-sm font-bold text-amber-600">電話で予約する</span>
+                    <span class="text-[10px] text-stone-500 mt-1">上のメモをそのまま読み上げるだけ</span>
+                </a>
+
+                <!-- LINE予約：コピーして貼り付ける -->
+                <button onclick="sendToLine()" class="flex flex-col items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-xl text-center shadow-sm transition active:scale-95">
+                    <span class="text-xl mb-1">💬</span>
+                    <span class="text-sm font-bold">LINEで予約する</span>
+                    <span class="text-[10px] text-emerald-100 mt-1">注文メモをコピーしてLINEを起動</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ③ 選ばれる3つの理由 -->
+    <section id="reasons" class="bg-white py-16 border-y border-stone-100">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-amber-600 font-bold text-sm tracking-widest block mb-2">OUR STRENGTHS</span>
+                <h2 class="text-3xl font-bold">安さ、美味しさ、安心。選ばれる3つの理由</h2>
+                <div class="w-12 h-1 bg-amber-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="space-y-12 max-w-4xl mx-auto">
+                <div class="reason-item flex flex-col md:flex-row items-center gap-6 md:gap-12 opacity-0">
+                    <div class="w-full md:w-1/3 text-center md:text-right">
+                        <span class="text-5xl font-black text-amber-200 block mb-2">01</span>
+                        <h3 class="text-lg md:text-xl font-bold">毎日食べてもお財布に優しい「驚きの価格差」</h3>
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <p class="text-stone-600 text-sm leading-relaxed">「毎日のランチ代がかさむ…」そんなお悩みを解決します。ワンコイン500円で買える圧倒的な安さで、お財布を気にせず毎日でも通っていただけます。</p>
+                    </div>
+                </div>
+
+                <div class="reason-item flex flex-col md:flex-row items-center gap-6 md:gap-12 pt-8 border-t border-dashed border-stone-100 opacity-0">
+                    <div class="w-full md:w-1/3 text-center md:text-right md:order-last">
+                        <span class="text-5xl font-black text-amber-200 block mb-2">02</span>
+                        <h3 class="text-lg md:text-xl font-bold">店内仕込みだから伝わる「手作りの匂いと暖かさ」</h3>
+                    </div>
+                    <div class="w-full md:w-2/3 md:order-first">
+                        <p class="text-stone-600 text-sm leading-relaxed">工場で作られた機械的な味ではありません。毎朝お店で野菜を刻み、お肉をジューシーに揚げています。お母さんが作ったような、どこか懐かしい安心の味です。</p>
+                    </div>
+                </div>
+
+                <div class="reason-item flex flex-col md:flex-row items-center gap-6 md:gap-12 pt-8 border-t border-dashed border-stone-100 opacity-0">
+                    <div class="w-full md:w-1/3 text-center md:text-right">
+                        <span class="text-5xl font-black text-amber-200 block mb-2">03</span>
+                        <h3 class="text-lg md:text-xl font-bold">ボリュームも味も「手抜きなし」の満足感</h3>
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <p class="text-stone-600 text-sm leading-relaxed">安いからといって、量や質をケチることはありません。お腹いっぱいになってほしいから、お肉もご飯もボリューム満点。「安くて、早くて、最高に美味しい」をお約束します。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ④ 店舗情報・アクセス -->
+    <section id="access" class="py-16 max-w-4xl mx-auto px-4">
+        <div class="bg-amber-50 border border-amber-100 rounded-3xl p-8 md:p-12 shadow-sm">
+            <div class="text-center mb-8">
+                <span id="store-status" class="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3">
+                    確認中...
+                </span>
+                <h2 class="text-2xl font-bold">店舗情報・アクセス</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h3 class="text-xl font-bold text-amber-600 mb-4">街のお弁当屋さん</h3>
+                    <table class="w-full text-sm text-left border-collapse">
+                        <tbody>
+                            <tr class="border-b border-amber-200/50">
+                                <th class="py-3 font-semibold text-stone-500 w-24">住所</th>
+                                <td class="py-3 text-stone-800 leading-relaxed">
+                                    〒213-0013 神奈川県川崎市高津区末長 779-5<br>
+                                    <span class="text-xs text-stone-500 block mt-1">（779-5, Kawasaki-shi, Kanagawa, Japan 213-0013）</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-amber-200/50"><th class="py-3 font-semibold text-stone-500">電話番号</th><td class="py-3 text-stone-800 font-bold">000-0000-0000</td></tr>
+                            <tr class="border-b border-amber-200/50"><th class="py-3 font-semibold text-stone-500">営業時間</th><td class="py-3 text-stone-800">11:00 ～ 20:00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="bg-stone-200 rounded-2xl h-48 flex flex-col items-center justify-center text-stone-500 border border-stone-300">
+                    <span class="text-2xl">📍</span><span class="text-xs font-bold">アクセスマップ</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- フッター -->
+    <footer class="bg-stone-950 text-stone-500 py-12 text-center text-xs border-t border-stone-900">
+        <p>© 街のお弁当屋さん All Rights Reserved.</p>
+    </footer>
+
+    <!-- JavaScript 制御 -->
+    <script>
+        // 1. GSAPアニメーション初期化
+        gsap.registerPlugin(ScrollTrigger);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline();
+            tl.to('#hero-tag', { opacity: 1, y: 0, duration: 0.6 })
+              .to('#hero-title', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4')
+              .to('#hero-text', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
+              .to('#hero-buttons', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4');
+
+            checkStoreStatus();
+        });
+
+        gsap.utils.toArray('.menu-card').forEach((card, i) => {
+            gsap.to(card, {
+                opacity: 1, y: 0, duration: 0.8,
+                scrollTrigger: { trigger: card, start: "top 85%", toggleActions: "play none none none" },
+                delay: i * 0.1
+            });
+        });
+
+        gsap.utils.toArray('.reason-item').forEach((item) => {
+            gsap.to(item, {
+                opacity: 1, y: 0, duration: 0.8,
+                scrollTrigger: { trigger: item, start: "top 80%" }
+            });
+        });
+
+        // 2. 湯気エフェクト
+        function createSteam() {
+            const container = document.getElementById('steam-container');
+            if (!container) return;
+
+            const steam = document.createElement('div');
+            steam.className = 'absolute bottom-0 bg-white/10 rounded-full filter blur-xl pointer-events-none';
+            const size = Math.random() * 60 + 30;
+            steam.style.width = `${size}px`;
+            steam.style.height = `${size}px`;
+            steam.style.left = `${Math.random() * 80 + 10}%`;
+
+            container.appendChild(steam);
+
+            gsap.to(steam, {
+                y: -300 - Math.random() * 150,
+                x: (Math.random() - 0.5) * 120,
+                opacity: 0,
+                scale: 2,
+                duration: 4 + Math.random() * 3,
+                ease: "power1.out",
+                onComplete: () => { steam.remove(); }
+            });
+        }
+        setInterval(createSteam, 350);
+
+        // 3. リアルタイム営業ステータス判定
+        function checkStoreStatus() {
+            const now = new Date();
+            const hours = now.getHours();
+            const isSunday = now.getDay() === 0;
+            const isOpen = !isSunday && (hours >= 11 && hours < 20);
+
+            const headerStatus = document.getElementById('header-status');
+            const storeStatus = document.getElementById('store-status');
+
+            if (isOpen) {
+                headerStatus.innerText = "営業中";
+                headerStatus.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800";
+                storeStatus.innerText = "🟢 本日も20:00まで営業中！";
+                storeStatus.className = "inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-emerald-100 text-emerald-800";
+            } else {
+                headerStatus.innerText = "準備中";
+                headerStatus.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800";
+                storeStatus.innerText = isSunday ? "🔴 本日は定休日です" : "🔴 ただいま準備中です（11時開店）";
+                storeStatus.className = "inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-rose-100 text-rose-800";
+            }
+        }
+
+        // 4. お弁当予約メモ機能 (全お弁当一律 500円)
+        const prices = { karaage: 500, hamburg: 500, daily: 500 };
+        const cart = { karaage: 0, hamburg: 0, daily: 0 };
+
+        function changeQty(item, change) {
+            cart[item] = Math.max(0, cart[item] + change);
+            document.getElementById(`qty-${item}`).innerText = cart[item];
+            updateOrderText();
+        }
+
+        // 注文テキストの組み立て
+        function generateOrderText() {
+            let textLines = [];
+            let totalPrice = 0;
+
+            const name = document.getElementById('cust-name').value || "（お名前未定）";
+            const time = document.getElementById('cust-time').value || "（受取時間未定）";
+
+            if (cart.karaage > 0) {
+                textLines.push(`・唐揚げ弁当 × ${cart.karaage}個`);
+                totalPrice += cart.karaage * prices.karaage;
+            }
+            if (cart.hamburg > 0) {
+                textLines.push(`・ハンバーグ弁当 × ${cart.hamburg}個`);
+                totalPrice += cart.hamburg * prices.hamburg;
+            }
+            if (cart.daily > 0) {
+                textLines.push(`・本日のおまかせ和風弁当 × ${cart.daily}個`);
+                totalPrice += cart.daily * prices.daily;
+            }
+
+            if (textLines.length === 0) return null;
+
+            return {
+                summaryHtml: textLines.map(line => `<li>${line}</li>`).join(''),
+                textPlain: `【持ち帰り予約】\nお名前：${name}様\n受取時間：${time}頃\n\n【ご注文内容】\n${textLines.join('\n')}\n\n合計：${totalPrice.toLocaleString()}円（税込）\n----------------`,
+                totalPrice: totalPrice
+            };
+        }
+
+        function updateOrderText() {
+            const order = generateOrderText();
+            const area = document.getElementById('reservation-area');
+
+            if (order) {
+                area.classList.remove('hidden');
+                document.getElementById('order-summary-list').innerHTML = order.summaryHtml;
+                document.getElementById('order-total-price').innerText = `${order.totalPrice.toLocaleString()}円`;
+            } else {
+                area.classList.add('hidden');
+            }
+        }
+
+        // LINEで送信する処理 (指定のLINE公式アカウント宛て)
+        function sendToLine() {
+            const order = generateOrderText();
+            if (!order) return;
+
+            // 注文文面をスマートフォンのクリップボードに自動コピー
+            navigator.clipboard.writeText(order.textPlain).then(() => {
+                alert("注文内容をコピーしました！\nLINEが開いたら、そのままトーク画面に『貼り付け（ペースト）』して送信してください。");
+                // 指定されたLINEリンクへ遷移
+                window.open("https://line.me/R/ti/p/@551geesd?oat_content=url&ts=12071628", "_blank");
+            }).catch(err => {
+                console.error("コピー失敗: ", err);
+                // コピー機能がうまく動かないブラウザ用のフォールバック（LINEのメッセージ転送URLを使用）
+                const lineUrl = `https://line.me/R/share?text=${encodeURIComponent(order.textPlain)}`;
+                window.open(lineUrl, "_blank");
+            });
+        }
+    </script>
+</body>
+</html>
